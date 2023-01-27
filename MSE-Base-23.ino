@@ -159,7 +159,7 @@ Adafruit_NeoPixel SmartLEDs(SMART_LED_COUNT, SMART_LED, NEO_RGB + NEO_KHZ800);
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 unsigned char LEDMaxBrightness = 50;
 unsigned char LEDBrightnessIndex= 0;
-unsigned char LEDBrightnessLevels[] = {5,30,56,81,107,132,158,183,209,255,209,183,158,107,81,56,30,5};
+unsigned char LEDBrightnessLevels[] = {5,15,30,45,60,75,90,105,120,135,150,165,180,195,210,225,240,255,240,225,210,195,180,165,150,135,120,105,90,75,60,45,30,15};
 //Smart LED mode chart
             //0123456789ABCDEF
 unsigned int  ui_Mode_Indicator[6] = {
@@ -442,12 +442,12 @@ void loop()
 
       //Change brightness to indicate heart beat 
       LEDBrightnessIndex++;
-      if(LEDBrightnessIndex > 17)
+      if(LEDBrightnessIndex > 35)
       {
         LEDBrightnessIndex = 0;
       }
       SmartLEDs.setBrightness(LEDBrightnessLevels[LEDBrightnessIndex]);
-      Serial.println(LEDBrightnessLevels[LEDBrightnessIndex]);
+      
       Indicator();
     }
   } 
