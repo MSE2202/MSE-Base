@@ -107,7 +107,7 @@ const int ci_Claw_Servo_Closed = 1880;        //  "
 const int ci_Shoulder_Servo_Retracted = 690;      //  "
 const int ci_Shoulder_Servo_Extended = 1300;      //  "
 
-const int ci_Display_Time = 50;  //50 ms
+const int ci_Display_Time = 100;  //100 ms
 
 const int ci_Motor_Calibration_Cycles = 3;
 const int ci_Motor_Calibration_Time = 5000;
@@ -159,16 +159,16 @@ Adafruit_NeoPixel SmartLEDs(SMART_LED_COUNT, SMART_LED, NEO_RGB + NEO_KHZ800);
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 unsigned char LEDMaxBrightness = 50;
 unsigned char LEDBrightnessIndex= 0;
-unsigned char LEDBrightnessLevels[] = {5,10,15,20,25,30,35,40,45,50,45,40,35,30,25,20,15,5};
+unsigned char LEDBrightnessLevels[] = {5,30,56,81,107,132,158,183,209,255,209,183,158,107,81,56,30,5};
 //Smart LED mode chart
             //0123456789ABCDEF
 unsigned int  ui_Mode_Indicator[6] = {
-  SmartLEDs.Color(5,0,0),  // Red - Stop
-  SmartLEDs.Color(0,5,0),  // Green - Run
-  SmartLEDs.Color(0,0,5),  // Blue - Calibrate motors
-  SmartLEDs.Color(5,5,5),  // colour? - empty case
-  SmartLEDs.Color(5,5,5),  // colour? - empty case
-  SmartLEDs.Color(5,5,5)  // colour? - empty case
+  SmartLEDs.Color(255,0,0),  // Red - Stop
+  SmartLEDs.Color(0,255,0),  // Green - Run
+  SmartLEDs.Color(0,0,255),  // Blue - Calibrate motors
+  SmartLEDs.Color(50,50,50),  // colour? - empty case
+  SmartLEDs.Color(50,50,50),  // colour? - empty case
+  SmartLEDs.Color(25,25,25)  // colour? - empty case
 };
 
 unsigned long ulPreviousMicros;
@@ -188,8 +188,8 @@ void setup()
 
   SmartLEDs.begin(); // INITIALIZE SMART LEDs object (REQUIRED)
   SmartLEDs.clear();
-  SmartLEDs.setPixelColor(0,SmartLEDs.Color(0,0,0));// Set pixel colors to 'off'
-  SmartLEDs.setBrightness(LEDMaxBrightness);
+  SmartLEDs.setPixelColor(0,SmartLEDs.Color(255,0,0));// Set pixel colors to 'off'
+ // SmartLEDs.setBrightness(LEDMaxBrightness);
   SmartLEDs.show();   // Send the updated pixel colors to the hardware.
 
     // set up drive motors
@@ -238,7 +238,7 @@ void loop()
   ulCurrentMicros = micros();
   if ((ulCurrentMicros - ulPreviousMicros) >= 1000)    //enter if 1ms has passed
   {
-    ulCurrentMicros = ulPreviousMicros;
+    ulPreviousMicros = ulCurrentMicros;
      
     ul_3_Second_timer = ul_3_Second_timer = 1;
     if(ul_3_Second_timer > 3000)
@@ -447,7 +447,7 @@ void loop()
         LEDBrightnessIndex = 0;
       }
       SmartLEDs.setBrightness(LEDBrightnessLevels[LEDBrightnessIndex]);
-      
+      Serial.println(LEDBrightnessLevels[LEDBrightnessIndex]);
       Indicator();
     }
   } 
