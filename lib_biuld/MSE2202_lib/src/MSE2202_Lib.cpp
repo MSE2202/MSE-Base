@@ -11,25 +11,80 @@
 #define DEBUGPRINT 1
 #define ACCELERATIONRATE 1;
 
+Motion::Motion()
+{
+	ucLEDcLastUnUsedChannel = 0;  
+}
+
+unsigned char Motion::Get_LEDcChannel()
+{
+	unsigned char uc_NewChannel;
+	
+	uc_NewChannel = ucLEDcLastUnUsedChannel;
+	ucLEDcLastUnUsedChannel++;
+	if(ucLEDcLastUnUsedChannel >= LEDCMAXCHANNELS)
+	{
+		return(100);
+	}
+	return(uc_NewChannel);
+	
+}
+
+void Motion::driveBegin(const int ciLeftMotorPin1, const int ciLeftMotorPin2,const int ciRightMotorPin1, const int ciRightMotorPin2)
+{
+	//setup PWM for motors
+	ucLEDcDriveChannels[0] = Get_LEDcChannel();
+    ledcAttachPin(ciLeftMotorPin1, ucLEDcDriveChannels[0]); // assign Motors pins to channels
+	 // Initialize channels 
+  // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
+  // ledcSetup(uint8_t channel, uint32_t freq, uint8_t resolution_bits);
+    ledcSetup(ucLEDcDriveChannels[0], 20000, 8); // 20mS PWM, 8-bit resolution
+	
+	ucLEDcDriveChannels[1] = Get_LEDcChannel();
+    ledcAttachPin(ciLeftMotorPin2, ucLEDcDriveChannels[1]);
+	ledcSetup(ucLEDcDriveChannels[1], 20000, 8);
+	
+	ucLEDcDriveChannels[2] = Get_LEDcChannel();
+    ledcAttachPin(ciRightMotorPin1, ucLEDcDriveChannels[2]);
+	ledcSetup(ucLEDcDriveChannels[2], 20000, 8);
+	
+	ucLEDcDriveChannels[3] = Get_LEDcChannel();
+    ledcAttachPin(ciRightMotorPin2, ucLEDcDriveChannels[3]);
+	ledcSetup(ucLEDcDriveChannels[3], 20000, 8);
+}
+
+void Motion::Forward(unsigned int uiSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],0);
+	ledcWrite(ucLEDcDriveChannels[1],uiSpeed);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],0);
+	ledcWrite(ucLEDcDriveChannels[3],uiSpeed);
+}
+
+void Motion::Forward(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],0);
+	ledcWrite(ucLEDcDriveChannels[1],uiLeftSpeed);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],0);
+	ledcWrite(ucLEDcDriveChannels[3],uiRightSpeed);
+}
+
+void Motion::end()
+{
+	ledcWrite(ucLEDcDriveChannels[0],0);
+	ledcWrite(ucLEDcDriveChannels[1],0);
+	ledcWrite(ucLEDcDriveChannels[2],0);
+	ledcWrite(ucLEDcDriveChannels[3],0);
+	
+	ucLEDcLastUnUsedChannel = 0; 
+}
 
 
-unsigned char ucMotion_Direction;
-unsigned char ucMotion_Speed;
-
-const uint8_t cui8StartingSpeed = 140;
-
-uint8_t ui8LeftWorkingSpeed = cui8StartingSpeed;
-uint8_t ui8RightWorkingSpeed = cui8StartingSpeed;
-
-unsigned char ucMotorState = 0;
-
-double dManualSpeed;
-double dForwardSpeed;
-double dReverseSpeed;
-double dLeftSpeed;
-double dRightSpeed;
-
-void setupMotion (void)
+/* void setupMotion (void)
 {
 	
   dManualSpeed = 0;
@@ -311,5 +366,6 @@ void move(uint8_t ui8Speed)
           break;
         }
       }
-}
-#endif
+} */
+
+

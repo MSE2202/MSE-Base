@@ -1,3 +1,7 @@
+#include <MSE2202_Lib.h>
+
+#include <MSE2202_Lib.h>
+
 /*
 
  MSE 2202 MSEBot base code for Labs 3 and 4
@@ -45,6 +49,8 @@
 #include <Adafruit_NeoPixel.h>
 //#include <Wire.h>
 //#include <I2CEncoder.h>
+#include <MSE2202_lib.h>
+
 
 //Servo servo_RightMotor;
 //Servo servo_LeftMotor;
@@ -175,6 +181,8 @@ unsigned long ulPreviousMicros;
 unsigned long ulCurrentMicros;
 
 
+//Motion Bot = Motion();
+
 //Function Declarations
 void Indicator(void);
 
@@ -186,23 +194,39 @@ void setup()
 
   Serial.begin(9600);
 
+  //Bot.driveBegin(LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
+  
   SmartLEDs.begin(); // INITIALIZE SMART LEDs object (REQUIRED)
   SmartLEDs.clear();
   SmartLEDs.setPixelColor(0,SmartLEDs.Color(255,0,0));// Set pixel colors to 'off'
  // SmartLEDs.setBrightness(LEDMaxBrightness);
   SmartLEDs.show();   // Send the updated pixel colors to the hardware.
 
-    // set up drive motors
   pinMode(LEFT_MOTOR_A, OUTPUT);
   pinMode(LEFT_MOTOR_B, OUTPUT);
   pinMode(RIGHT_MOTOR_A, OUTPUT);
   pinMode(RIGHT_MOTOR_B, OUTPUT);
 
-  // set up arm motors
-   ledcSetup(1, 50,14);// channel 1, 50 Hz, 14-bit width
-   ledcAttachPin(SHOULDER_SERVO, 1); // assign servo pins to channels
-   ledcSetup(2, 50,14);// channel 2, 50 Hz, 14-bit width
-   ledcAttachPin(CLAW_SERVO, 2); // assign servo pins to channels
+  //setup PWM for motors
+  // ledcAttachPin(LEFT_MOTOR_A, 1); // assign Motors pins to channels
+  // ledcAttachPin(LEFT_MOTOR_B, 2);
+  // ledcAttachPin(RIGHT_MOTOR_A, 3);
+  // ledcAttachPin(RIGHT_MOTOR_B, 4);
+  
+
+  // // Initialize channels 
+  // // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
+  // // ledcSetup(uint8_t channel, uint32_t freq, uint8_t resolution_bits);
+  // ledcSetup(1, 20000, 8); // 20mS PWM, 8-bit resolution
+  // ledcSetup(2, 20000, 8);
+  // ledcSetup(3, 20000, 8);
+  // ledcSetup(4, 20000, 8);
+
+  // // set up arm motors
+  //  ledcSetup(1, 50,14);// channel 1, 50 Hz, 14-bit width
+  //  ledcAttachPin(SHOULDER_SERVO, 1); // assign servo pins to channels
+  //  ledcSetup(2, 50,14);// channel 2, 50 Hz, 14-bit width
+  //  ledcAttachPin(CLAW_SERVO, 2); // assign servo pins to channels
   
 
   // set up motor enable switch
@@ -240,7 +264,7 @@ void loop()
   {
     ulPreviousMicros = ulCurrentMicros;
      
-    ul_3_Second_timer = ul_3_Second_timer = 1;
+    ul_3_Second_timer = ul_3_Second_timer + 1;
     if(ul_3_Second_timer > 3000)
     {
       ul_3_Second_timer = 0;
@@ -303,7 +327,7 @@ void loop()
     {
       case 0:    //Robot stopped
       {
-      
+        Serial.println("case 0");
       // encoder_LeftMotor.zero();
       // encoder_RightMotor.zero();
       
@@ -312,9 +336,11 @@ void loop()
   
       case 1:    //Robot Run after 3 seconds
       {
+        Serial.print("case 1   ");
+        Serial.println(ul_3_Second_timer);
         if(bt_3_S_Time_Up)
         {
-        
+        Serial.println("case 1  3");
   #ifdef DEBUG_ENCODERS           
         // l_Left_Motor_Position = encoder_LeftMotor.getRawPosition();
         //  l_Right_Motor_Position = encoder_RightMotor.getRawPosition();
@@ -329,8 +355,16 @@ void loop()
           ui_Left_Motor_Speed = constrain(ui_Motors_Speed + ui_Left_Motor_Offset, 1600, 2100);
           ui_Right_Motor_Speed = constrain(ui_Motors_Speed + ui_Right_Motor_Offset, 1600, 2100);
 
-        
-
+         // Bot.Forward(250);
+          // ledcWrite(2,0);
+          // ledcWrite(1,250);
+          // ledcWrite(4,0);
+          // ledcWrite(3,250);
+          digitalWrite(LEFT_MOTOR_A, HIGH);
+          digitalWrite(LEFT_MOTOR_B, LOW);
+          digitalWrite(RIGHT_MOTOR_A, HIGH);
+          digitalWrite(RIGHT_MOTOR_B, LOW);
+          Serial.println("here");
           if(bt_Motors_Enabled)
           {
             //servo_LeftMotor.writeMicroseconds(ui_Left_Motor_Speed);
