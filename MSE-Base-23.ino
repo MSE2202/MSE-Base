@@ -42,20 +42,9 @@
 
 
 
-
-//#include <Servo.h>
-//#include <EEPROM.h>
-//#include <uSTimer2.h>
 #include <Adafruit_NeoPixel.h>
-//#include <Wire.h>
-//#include <I2CEncoder.h>
 #include <MSE2202_lib.h>
 
-
-//Servo servo_RightMotor;
-//Servo servo_LeftMotor;
-//Servo servo_ArmMotor;    
-//Servo servo_GripMotor;
 
 
 
@@ -63,7 +52,7 @@
 //#define DEBUG_MOTORS
 //#define DEBUG_ENCODERS
 //#define DEBUG_MOTOR_CALIBRATION
-
+//#define DEBUG_SPEED_POT 1
 
 //port pin constants
 
@@ -76,6 +65,8 @@
 
 #define SHOULDER_SERVO 41    //GPIO41 pin 34 (J41) Servo 1
 #define CLAW_SERVO 42       //GPIO42 pin 35 (J42) Servo 2
+
+#define BRDTST_POT_R1  1    //when DIP Switch S1-12 is ON, Analog AD0 (pin 39, GPIO1 is connected to Poteniometer R1
 
 #define MOTOR_ENABLE_SWITCH 3     //DIP Switch S1-5 pulls Digital pin D3 to ground when ON; pin 15 GPIO3 (J3); When DIP Switch S1-5 is off can be used as analog AD1-2
 
@@ -104,10 +95,6 @@ const int ci_Right_Motor_Offset_Address_L = 14;
 const int ci_Right_Motor_Offset_Address_H = 15;
 
 
-const int ci_Left_Motor_Stop = 1500;        // 200 for brake mode; 1500 for stop
-const int ci_Right_Motor_Stop = 1500;
-
-
 const int ci_Claw_Servo_Open = 1650;         // Experiment to determine appropriate value
 const int ci_Claw_Servo_Closed = 1880;        //  "
 const int ci_Shoulder_Servo_Retracted = 690;      //  "
@@ -124,18 +111,12 @@ boolean bt_Motors_Enabled = true;
 byte b_LowByte;
 byte b_HighByte;
 
-
-unsigned int ui_Motors_Speed = 1900;        // Default run speed
-unsigned int ui_Left_Motor_Speed;
-unsigned int ui_Right_Motor_Speed;
-long l_Left_Motor_Position;
-long l_Right_Motor_Position;
+unsigned char ucDriveSpeed;
 
 unsigned long ul_3_Second_timer = 0;
 unsigned long ul_Display_Time;
 unsigned long ul_Calibration_Time;
-unsigned long ui_Left_Motor_Offset;
-unsigned long ui_Right_Motor_Offset;
+
 
 unsigned int uiMode_Debounce;
 
@@ -181,7 +162,7 @@ unsigned long ulPreviousMicros;
 unsigned long ulCurrentMicros;
 
 
-//Motion Bot = Motion();
+Motion Bot = Motion();
 
 //Function Declarations
 void Indicator(void);
@@ -194,7 +175,7 @@ void setup()
 
   Serial.begin(9600);
 
-  //Bot.driveBegin(LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
+  Bot.driveBegin(LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
   
   SmartLEDs.begin(); // INITIALIZE SMART LEDs object (REQUIRED)
   SmartLEDs.clear();
@@ -202,25 +183,7 @@ void setup()
  // SmartLEDs.setBrightness(LEDMaxBrightness);
   SmartLEDs.show();   // Send the updated pixel colors to the hardware.
 
-  pinMode(LEFT_MOTOR_A, OUTPUT);
-  pinMode(LEFT_MOTOR_B, OUTPUT);
-  pinMode(RIGHT_MOTOR_A, OUTPUT);
-  pinMode(RIGHT_MOTOR_B, OUTPUT);
-
-  //setup PWM for motors
-  // ledcAttachPin(LEFT_MOTOR_A, 1); // assign Motors pins to channels
-  // ledcAttachPin(LEFT_MOTOR_B, 2);
-  // ledcAttachPin(RIGHT_MOTOR_A, 3);
-  // ledcAttachPin(RIGHT_MOTOR_B, 4);
   
-
-  // // Initialize channels 
-  // // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
-  // // ledcSetup(uint8_t channel, uint32_t freq, uint8_t resolution_bits);
-  // ledcSetup(1, 20000, 8); // 20mS PWM, 8-bit resolution
-  // ledcSetup(2, 20000, 8);
-  // ledcSetup(3, 20000, 8);
-  // ledcSetup(4, 20000, 8);
 
   // // set up arm motors
   //  ledcSetup(1, 50,14);// channel 1, 50 Hz, 14-bit width
@@ -327,7 +290,7 @@ void loop()
     {
       case 0:    //Robot stopped
       {
-        Serial.println("case 0");
+       Bot.Stop();
       // encoder_LeftMotor.zero();
       // encoder_RightMotor.zero();
       
@@ -336,11 +299,10 @@ void loop()
   
       case 1:    //Robot Run after 3 seconds
       {
-        Serial.print("case 1   ");
-        Serial.println(ul_3_Second_timer);
+        
         if(bt_3_S_Time_Up)
         {
-        Serial.println("case 1  3");
+        
   #ifdef DEBUG_ENCODERS           
         // l_Left_Motor_Position = encoder_LeftMotor.getRawPosition();
         //  l_Right_Motor_Position = encoder_RightMotor.getRawPosition();
@@ -355,16 +317,15 @@ void loop()
           ui_Left_Motor_Speed = constrain(ui_Motors_Speed + ui_Left_Motor_Offset, 1600, 2100);
           ui_Right_Motor_Speed = constrain(ui_Motors_Speed + ui_Right_Motor_Offset, 1600, 2100);
 
-         // Bot.Forward(250);
-          // ledcWrite(2,0);
-          // ledcWrite(1,250);
-          // ledcWrite(4,0);
-          // ledcWrite(3,250);
-          digitalWrite(LEFT_MOTOR_A, HIGH);
-          digitalWrite(LEFT_MOTOR_B, LOW);
-          digitalWrite(RIGHT_MOTOR_A, HIGH);
-          digitalWrite(RIGHT_MOTOR_B, LOW);
-          Serial.println("here");
+
+          ucDriveSpeed = map(analogRead(BRDTST_POT_R1),0,4096,150,255);
+          Serial.print(F("Drive Speed: Pot R1 = "));
+          Serial.print(analogRead(BRDTST_POT_R1));
+          Serial.print(F(",mapped = "));
+          Serial.println(ucDriveSpeed);
+          Bot.Forward(ucDriveSpeed);
+          
+         
           if(bt_Motors_Enabled)
           {
             //servo_LeftMotor.writeMicroseconds(ui_Left_Motor_Speed);
@@ -392,67 +353,69 @@ void loop()
       } 
     case 2:    //Calibrate motor straightness after 3 seconds.
       {
-        if(bt_3_S_Time_Up)
-        {
-          if(!bt_Cal_Initialized)
-          {
-            bt_Cal_Initialized = true;
-          // encoder_LeftMotor.zero();
-          // encoder_RightMotor.zero();
-            ul_Calibration_Time = millis();
-          // servo_LeftMotor.writeMicroseconds(ui_Motors_Speed);
-            //servo_RightMotor.writeMicroseconds(ui_Motors_Speed);
-          }
-          else if((millis() - ul_Calibration_Time) > ci_Motor_Calibration_Time) 
-          {
-          //  servo_LeftMotor.writeMicroseconds(ci_Left_Motor_Stop); 
-          //  servo_RightMotor.writeMicroseconds(ci_Right_Motor_Stop); 
-          // l_Left_Motor_Position = encoder_LeftMotor.getRawPosition();
-          // l_Right_Motor_Position = encoder_RightMotor.getRawPosition();
-            if(l_Left_Motor_Position > l_Right_Motor_Position)
-            {
-            // May have to update this if different calibration time is used
-              ui_Right_Motor_Offset = 0;
-              ui_Left_Motor_Offset = (l_Left_Motor_Position - l_Right_Motor_Position) / 4;  
-            }
-            else
-            {
-            // May have to update this if different calibration time is used
-              ui_Right_Motor_Offset = (l_Right_Motor_Position - l_Left_Motor_Position) / 4;
-              ui_Left_Motor_Offset = 0;
-            }
+        // if(bt_3_S_Time_Up)
+        // {
+        //   if(!bt_Cal_Initialized)
+        //   {
+        //     bt_Cal_Initialized = true;
+        //   // encoder_LeftMotor.zero();
+        //   // encoder_RightMotor.zero();
+        //     ul_Calibration_Time = millis();
+        //   // servo_LeftMotor.writeMicroseconds(ui_Motors_Speed);
+        //     //servo_RightMotor.writeMicroseconds(ui_Motors_Speed);
+        //   }
+        //   else if((millis() - ul_Calibration_Time) > ci_Motor_Calibration_Time) 
+        //   {
+        //   //  servo_LeftMotor.writeMicroseconds(ci_Left_Motor_Stop); 
+        //   //  servo_RightMotor.writeMicroseconds(ci_Right_Motor_Stop); 
+        //   // l_Left_Motor_Position = encoder_LeftMotor.getRawPosition();
+        //   // l_Right_Motor_Position = encoder_RightMotor.getRawPosition();
+        //     if(l_Left_Motor_Position > l_Right_Motor_Position)
+        //     {
+        //     // May have to update this if different calibration time is used
+        //       ui_Right_Motor_Offset = 0;
+        //       ui_Left_Motor_Offset = (l_Left_Motor_Position - l_Right_Motor_Position) / 4;  
+        //     }
+        //     else
+        //     {
+        //     // May have to update this if different calibration time is used
+        //       ui_Right_Motor_Offset = (l_Right_Motor_Position - l_Left_Motor_Position) / 4;
+        //       ui_Left_Motor_Offset = 0;
+        //     }
+            Bot.Reverse(ucDriveSpeed);
+  // #ifdef DEBUG_MOTOR_CALIBRATION
+  //           Serial.print("Motor Offsets: Left = ");
+  //           Serial.print(ui_Left_Motor_Offset);
+  //           Serial.print(", Right = ");
+  //           Serial.println(ui_Right_Motor_Offset);
+  // #endif              
+  //       //   EEPROM.write(ci_Right_Motor_Offset_Address_L, lowByte(ui_Right_Motor_Offset));
+  //       //   EEPROM.write(ci_Right_Motor_Offset_Address_H, highByte(ui_Right_Motor_Offset));
+  //       //   EEPROM.write(ci_Left_Motor_Offset_Address_L, lowByte(ui_Left_Motor_Offset));
+  //         //  EEPROM.write(ci_Left_Motor_Offset_Address_H, highByte(ui_Left_Motor_Offset));
             
-  #ifdef DEBUG_MOTOR_CALIBRATION
-            Serial.print("Motor Offsets: Left = ");
-            Serial.print(ui_Left_Motor_Offset);
-            Serial.print(", Right = ");
-            Serial.println(ui_Right_Motor_Offset);
-  #endif              
-        //   EEPROM.write(ci_Right_Motor_Offset_Address_L, lowByte(ui_Right_Motor_Offset));
-        //   EEPROM.write(ci_Right_Motor_Offset_Address_H, highByte(ui_Right_Motor_Offset));
-        //   EEPROM.write(ci_Left_Motor_Offset_Address_L, lowByte(ui_Left_Motor_Offset));
-          //  EEPROM.write(ci_Left_Motor_Offset_Address_H, highByte(ui_Left_Motor_Offset));
-            
-            ui_Robot_Mode_Index = 0;    // go back to Mode 0 
-          }
-  #ifdef DEBUG_MOTOR_CALIBRATION           
-            Serial.print("Encoders L: ");
-          // Serial.print(encoder_LeftMotor.getRawPosition());
-            Serial.print(", R: ");
-          // Serial.println(encoder_RightMotor.getRawPosition());
-  #endif        
+  //           ui_Robot_Mode_Index = 0;    // go back to Mode 0 
+  //         }
+  // #ifdef DEBUG_MOTOR_CALIBRATION           
+  //           Serial.print("Encoders L: ");
+  //         // Serial.print(encoder_LeftMotor.getRawPosition());
+  //           Serial.print(", R: ");
+  //         // Serial.println(encoder_RightMotor.getRawPosition());
+  // #endif        
           
-        } 
+   //     } 
         break;
       }   
       case 3:
       {
-        ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
+        Bot.Left(ucDriveSpeed);
+        //ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  
       case 4:
       {
-        ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
+        Bot.Right(ucDriveSpeed);
+        //ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  
       case 5:

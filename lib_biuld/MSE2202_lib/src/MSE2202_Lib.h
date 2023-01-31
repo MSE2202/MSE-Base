@@ -30,8 +30,11 @@ public:
 		void Forward(unsigned int uiSpeed);
 		void Forward(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
 		void Reverse(unsigned int uiSpeed);
+		void Reverse(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
 		void Left(unsigned int uiSpeed);
+		void Left(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
 		void Right(unsigned int uiSpeed);
+		void Right(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
 		void Stop();
 		void end();
 

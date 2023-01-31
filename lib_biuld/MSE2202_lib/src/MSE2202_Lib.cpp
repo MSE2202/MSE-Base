@@ -73,6 +73,74 @@ void Motion::Forward(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
 	ledcWrite(ucLEDcDriveChannels[3],uiRightSpeed);
 }
 
+void Motion::Reverse(unsigned int uiSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],uiSpeed);
+	ledcWrite(ucLEDcDriveChannels[1],0);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],uiSpeed);
+	ledcWrite(ucLEDcDriveChannels[3],0);
+}
+
+void Motion::Reverse(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],uiLeftSpeed);
+	ledcWrite(ucLEDcDriveChannels[1],0);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],uiRightSpeed);
+	ledcWrite(ucLEDcDriveChannels[3],0);
+}
+void Motion::Left(unsigned int uiSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],uiSpeed);
+	ledcWrite(ucLEDcDriveChannels[1],0);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],0);
+	ledcWrite(ucLEDcDriveChannels[3],uiSpeed);
+}
+
+void Motion::Left(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],uiLeftSpeed);
+	ledcWrite(ucLEDcDriveChannels[1],0);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],0);
+	ledcWrite(ucLEDcDriveChannels[3],uiRightSpeed);
+}
+void Motion::Right(unsigned int uiSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],0);
+	ledcWrite(ucLEDcDriveChannels[1],uiSpeed);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],uiSpeed);
+	ledcWrite(ucLEDcDriveChannels[3],0);
+}
+
+void Motion::Right(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],0);
+	ledcWrite(ucLEDcDriveChannels[1],uiLeftSpeed);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],uiRightSpeed);
+	ledcWrite(ucLEDcDriveChannels[3],0);
+}
+void Motion::Stop()
+{
+	//Left Motor
+	ledcWrite(ucLEDcDriveChannels[0],0);
+	ledcWrite(ucLEDcDriveChannels[1],0);
+	//Right Motor
+    ledcWrite(ucLEDcDriveChannels[2],0);
+	ledcWrite(ucLEDcDriveChannels[3],0);
+}
+
+
 void Motion::end()
 {
 	ledcWrite(ucLEDcDriveChannels[0],0);
