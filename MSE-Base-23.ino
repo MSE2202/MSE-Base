@@ -46,12 +46,8 @@
 #include <MSE2202_lib.h>
 
 
-
-
 // Uncomment keywords to enable debugging output
-//#define DEBUG_MOTORS
-//#define DEBUG_ENCODERS
-//#define DEBUG_MOTOR_CALIBRATION
+
 //#define DEBUG_SPEED_POT 1
 
 //port pin constants
@@ -88,12 +84,6 @@
 //constants
 
 // EEPROM addresses
-
-const int ci_Left_Motor_Offset_Address_L = 12;
-const int ci_Left_Motor_Offset_Address_H = 13;
-const int ci_Right_Motor_Offset_Address_L = 14;
-const int ci_Right_Motor_Offset_Address_H = 15;
-
 
 const int ci_Claw_Servo_Open = 1650;         // Experiment to determine appropriate value
 const int ci_Claw_Servo_Closed = 1880;        //  "
@@ -175,7 +165,7 @@ void setup()
 
   Serial.begin(9600);
 
-  Bot.driveBegin(LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
+  Bot.driveBegin("D1",LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
   
   SmartLEDs.begin(); // INITIALIZE SMART LEDs object (REQUIRED)
   SmartLEDs.clear();
@@ -303,19 +293,9 @@ void loop()
         if(bt_3_S_Time_Up)
         {
         
-  #ifdef DEBUG_ENCODERS           
-        // l_Left_Motor_Position = encoder_LeftMotor.getRawPosition();
-        //  l_Right_Motor_Position = encoder_RightMotor.getRawPosition();
+  
 
-          Serial.print("Encoders L: ");
-          Serial.print(l_Left_Motor_Position);
-          Serial.print(", R: ");
-          Serial.println(l_Right_Motor_Position);
-  #endif
-
-        // set motor speeds
-          ui_Left_Motor_Speed = constrain(ui_Motors_Speed + ui_Left_Motor_Offset, 1600, 2100);
-          ui_Right_Motor_Speed = constrain(ui_Motors_Speed + ui_Right_Motor_Offset, 1600, 2100);
+        
 
 
           ucDriveSpeed = map(analogRead(BRDTST_POT_R1),0,4096,150,255);
@@ -323,7 +303,7 @@ void loop()
           Serial.print(analogRead(BRDTST_POT_R1));
           Serial.print(F(",mapped = "));
           Serial.println(ucDriveSpeed);
-          Bot.Forward(ucDriveSpeed);
+          Bot.Forward("D1",ucDriveSpeed);
           
          
           if(bt_Motors_Enabled)
@@ -337,16 +317,7 @@ void loop()
             //servo_RightMotor.writeMicroseconds(ci_Right_Motor_Stop); 
           }
 
-  #ifdef DEBUG_MOTORS
-          Serial.print("Motors enabled: ");
-          Serial.print(bt_Motors_Enabled);
-          Serial.print(", Default: ");
-          Serial.print(ui_Motors_Speed);
-          Serial.print(", Left = ");
-          Serial.print(ui_Left_Motor_Speed);
-          Serial.print(", Right = ");
-          Serial.println(ui_Right_Motor_Speed);
-  #endif    
+ 
           
         }
         break;
