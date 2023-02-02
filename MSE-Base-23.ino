@@ -280,7 +280,7 @@ void loop()
     {
       case 0:    //Robot stopped
       {
-       Bot.Stop();
+       Bot.Stop("D1");
       // encoder_LeftMotor.zero();
       // encoder_RightMotor.zero();
       
@@ -353,7 +353,7 @@ void loop()
         //       ui_Right_Motor_Offset = (l_Right_Motor_Position - l_Left_Motor_Position) / 4;
         //       ui_Left_Motor_Offset = 0;
         //     }
-            Bot.Reverse(ucDriveSpeed);
+            Bot.Reverse("D1",ucDriveSpeed);
   // #ifdef DEBUG_MOTOR_CALIBRATION
   //           Serial.print("Motor Offsets: Left = ");
   //           Serial.print(ui_Left_Motor_Offset);
@@ -379,13 +379,13 @@ void loop()
       }   
       case 3:
       {
-        Bot.Left(ucDriveSpeed);
+        Bot.Left("D1",ucDriveSpeed);
         //ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  
       case 4:
       {
-        Bot.Right(ucDriveSpeed);
+        Bot.Right("D1",ucDriveSpeed);
         //ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  

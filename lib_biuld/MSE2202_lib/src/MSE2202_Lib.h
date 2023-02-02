@@ -39,16 +39,42 @@ public:
  and servoBegin uses 1 channel each.
 */			
 		void ServoBegin(char cServoID[2], int iServoPin1);
-		
-		void Forward(char cID[2], unsigned int uiSpeed);
-		void Forward(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
-		void Reverse(unsigned int uiSpeed);
-		void Reverse(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
-		void Left(unsigned int uiSpeed);
-		void Left(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
-		void Right(unsigned int uiSpeed);
-		void Right(unsigned int uiLeftSpeed,unsigned int uiRightSpeed );
-		void Stop();
+/*
+  Will run the motor(s) "Forward" at speed in ucSpeed ( 0 to 255),Can be both Drive or Motor ID = M1 to M4 or D1, D2
+*/			
+		void Forward(char cID[2], unsigned int ucSpeed);
+/*
+  Will run the motor(s) "Forward" at ucLeftSpeed( 0 to 255) for left motor and ucRightSpeed ( 0 to 255) for right motor.  Only for Drive ID = D1, D2
+*/		
+		void Forward(char cID[2],unsigned char ucLeftSpeed, unsigned int ucRightSpeed );
+/*
+  Will run the motor(s) "Reverse" at speed in ucSpeed ( 0 to 255),Can be both Drive or Motor ID = M1 to M4 or D1, D2
+*/		
+		void Reverse(char cID[2],unsigned int ucSpeed);
+/*
+  Will run the motor(s) "Reverse" at ucLeftSpeed( 0 to 255) for left motor and ucRightSpeed ( 0 to 255) for right motor.  Only for Drive ID = D1, D2
+*/		
+		void Reverse(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed );
+/*
+  Will run the motor(s) "Left" (Right motor forward and  Left motor in reverse, zero point turn) at speed in ucSpeed ( 0 to 255), Only for Drive ID = D1, D2
+*/		
+		void Left(char cID[2],unsigned int ucSpeed);
+/*
+  Will run the motor(s) "Left" (Right motor forward at ucRightSpeed speed and  Left motor in reverse at ucLeftSpeed speed , will do sweep turn), Only for Drive ID = D1, D2
+*/		
+		void Left(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed );
+/*
+  Will run the motor(s) "Right" (Right motor reverse and  Left motor in forward, zero point turn) at speed in ucSpeed ( 0 to 255), Only for Drive ID = D1, D2
+*/		
+		void Right(char cID[2],unsigned int ucSpeed);
+/*
+  Will run the motor(s) "Right" (Right motor reverse at ucRightSpeed speed and  Left motor in forward at ucLeftSpeed speed , will do sweep turn), Only for Drive ID = D1, D2
+*/		
+		void Right(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed );
+/*
+  Will run the Stop motor(s) 55), Can be Drive,  Motor or Servo ID = M1 to M4 or D1, D2
+*/		
+		void Stop(char cID[2]);
 		void end();
 
 	  

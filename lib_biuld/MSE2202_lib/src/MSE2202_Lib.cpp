@@ -35,13 +35,13 @@ void Motion::driveBegin(char cDriveID[2], int iLeftMotorPin1, int iLeftMotorPin2
 {
 	char c_driveID; 
 	
-	if((cDriveID[0] == "d") || (cDriveID[0] == "D"))
+	if((cDriveID[0] == 'd') || (cDriveID[0] == 'D'))
 	{
-		if(cDriveID[1] == "1")
+		if(cDriveID[1] == '1')
 		{
 			c_driveID = 1;
 		}
-		else if(cDriveID[1] == "2")
+		else if(cDriveID[1] == '2')
 		{
 			c_driveID = 2;
 		}
@@ -142,7 +142,7 @@ void Motion::ServoBegin(char cServoID[2], int iServoPin1)
 	}
 }
 
-void Motion::Forward(char cID[2], unsigned int uiSpeed)
+void Motion::Forward(char cID[2], unsigned int ucSpeed)
 { 
     char c_ID; 
 	
@@ -197,90 +197,353 @@ void Motion::Forward(char cID[2], unsigned int uiSpeed)
 	
 }
 
-void Motion::Forward(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+
+
+void Motion::Forward(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],0);
-	ledcWrite(ucLEDcDriveChannels[1],uiLeftSpeed);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],0);
-	ledcWrite(ucLEDcDriveChannels[3],uiRightSpeed);
+	 char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],uiLeftSpeed);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],uiRightSpeed);
+			break;
+		}
+		
+		default:
+		{
+			return(101);
+		}
+	}
+		
 }
 
-void Motion::Reverse(unsigned int uiSpeed)
+void Motion::Reverse(char cID[2],unsigned int ucSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],uiSpeed);
-	ledcWrite(ucLEDcDriveChannels[1],0);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],uiSpeed);
-	ledcWrite(ucLEDcDriveChannels[3],0);
+	char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],uiSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],0);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],uiSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		case 'm':
+		case 'M':
+		{
+			if((cID[1] >= "1") &&  (cID[1] <= "4")
+			{
+				c_ID = cID[1] - 0x30;
+			}
+			else 
+			{
+				return(101);
+			}
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],uiSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
 
-void Motion::Reverse(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+void Motion::Reverse(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],uiLeftSpeed);
-	ledcWrite(ucLEDcDriveChannels[1],0);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],uiRightSpeed);
-	ledcWrite(ucLEDcDriveChannels[3],0);
+	 char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],uiLeftSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],0);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],uiRightSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
-void Motion::Left(unsigned int uiSpeed)
+void Motion::Left(char cID[2],unsigned int ucSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],uiSpeed);
-	ledcWrite(ucLEDcDriveChannels[1],0);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],0);
-	ledcWrite(ucLEDcDriveChannels[3],uiSpeed);
+	char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],ucSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],0);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],ucSpeed);
+			break;
+		}
+		
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
 
-void Motion::Left(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+void Motion::Left(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],uiLeftSpeed);
-	ledcWrite(ucLEDcDriveChannels[1],0);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],0);
-	ledcWrite(ucLEDcDriveChannels[3],uiRightSpeed);
+	char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],uiLeftSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],0);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],uiRightSpeed);
+			break;
+		}
+		
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
-void Motion::Right(unsigned int uiSpeed)
+void Motion::Right(char cID[2],unsigned int ucSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],0);
-	ledcWrite(ucLEDcDriveChannels[1],uiSpeed);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],uiSpeed);
-	ledcWrite(ucLEDcDriveChannels[3],0);
+	char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],uiSpeed);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],uiSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
 
-void Motion::Right(unsigned int uiLeftSpeed,unsigned int uiRightSpeed)
+void Motion::Right(char cID[2],unsigned int ucLeftSpeed,unsigned int ucRightSpeed)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],0);
-	ledcWrite(ucLEDcDriveChannels[1],uiLeftSpeed);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],uiRightSpeed);
-	ledcWrite(ucLEDcDriveChannels[3],0);
+	char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],uiLeftSpeed);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],uiRightSpeed);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
-void Motion::Stop()
+void Motion::Stop(char cID[2],)
 {
-	//Left Motor
-	ledcWrite(ucLEDcDriveChannels[0],0);
-	ledcWrite(ucLEDcDriveChannels[1],0);
-	//Right Motor
-    ledcWrite(ucLEDcDriveChannels[2],0);
-	ledcWrite(ucLEDcDriveChannels[3],0);
+	 char c_ID; 
+	
+	switch(cID[0])
+	{
+		case 'd':
+		case 'D':
+		{
+			if(cID[1] == "1")
+			{
+				c_ID = 1;
+			}
+			else if(cID[1] == "2")
+			{
+				c_ID = 2;
+			}
+			else
+			{
+				return(101);
+			}
+			
+			//Left Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 4],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 3],0);
+			//Right Motor
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		case 'm':
+		case 'M':
+		{
+			if((cID[1] >= "1") &&  (cID[1] <= "4")
+			{
+				c_ID = cID[1] - 0x30;
+			}
+			else 
+			{
+				return(101);
+			}
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 2],0);
+			ledcWrite(ucLEDcDriveChannels[(c_ID * 4) - 1],0);
+			break;
+		}
+		default:
+		{
+			return(101);
+		}
+	}
+	
 }
 
 
 void Motion::end()
 {
-	ledcWrite(ucLEDcDriveChannels[0],0);
-	ledcWrite(ucLEDcDriveChannels[1],0);
-	ledcWrite(ucLEDcDriveChannels[2],0);
-	ledcWrite(ucLEDcDriveChannels[3],0);
+	for(unsigned char ucLEDcIndex = 0; ucLEDcIndex < ucLEDcLastUnUsedChannel; ucLEDcIndex++)
+	{
+		ledcWrite(ucLEDcDriveChannels[ucLEDcIndex],0);
+	}
+	
 	
 	ucLEDcLastUnUsedChannel = 0; 
 }
