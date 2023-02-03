@@ -19,7 +19,7 @@
 
 #define LEDCMAXCHANNELS 8
 
-TaskHandle_t Core_Zero;
+//TaskHandle_t Core_Zero;
 
 class Motion
 {
@@ -95,100 +95,100 @@ private:
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-class Encoders
-{
-public:
-	    Encoders();
-	    ~Encoders(){ end(); }
-/*
-  Begin with set up both encoders: (ucEncoderType 0 - 2 will set the pin as per the MSE-Duino V4.2 board,ucEncoderType 3 - 5 pin data will need to be sent)
-  If ucEncoderType = 0 then the direction and speed pins will be used and switches SW1-3, SW1-4, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
-   NOT TESTED - If ucEncoderType = 1 then the Quadrature pins A, B will be used and switches SW1-1, SW1-2, SW1-7, and SW1-8 should be turned on, on on the MSE-Duino board
-   NOT TESTED -  If ucEncoderType = 2 then the direction, speed, and Quadrature pins A, B pins will be used and switches SW1-1, SW1-2, SW1-3, SW1-4, SW1-7, SW1-8, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
+// class Encoders
+// {
+// public:
+	    // Encoders();
+	    // ~Encoders(){ end(); }
+// /*
+  // Begin with set up both encoders: (ucEncoderType 0 - 2 will set the pin as per the MSE-Duino V4.2 board,ucEncoderType 3 - 5 pin data will need to be sent)
+  // If ucEncoderType = 0 then the direction and speed pins will be used and switches SW1-3, SW1-4, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
+   // NOT TESTED - If ucEncoderType = 1 then the Quadrature pins A, B will be used and switches SW1-1, SW1-2, SW1-7, and SW1-8 should be turned on, on on the MSE-Duino board
+   // NOT TESTED -  If ucEncoderType = 2 then the direction, speed, and Quadrature pins A, B pins will be used and switches SW1-1, SW1-2, SW1-3, SW1-4, SW1-7, SW1-8, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
   
   
-*/
-		void Begin(unsigned char ucEncoderType,void (*ISR_callback)(void)); 
-/*
-  NOT TESTED -  Begin with set up both encoders: (ucEncoderType 3 - 5 pin data will need to be sent)
-  If ucEncoderType = 3 then the direction and speed pins will be used and switches SW1-3, SW1-4, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
-  If ucEncoderType = 4 then the Quadrature pins A, B will be used and switches SW1-1, SW1-2, SW1-7, and SW1-8 should be turned on, on on the MSE-Duino board
+// */
+		// void Begin(unsigned char ucEncoderType,void (*ISR_callback)(void)); 
+// /*
+  // NOT TESTED -  Begin with set up both encoders: (ucEncoderType 3 - 5 pin data will need to be sent)
+  // If ucEncoderType = 3 then the direction and speed pins will be used and switches SW1-3, SW1-4, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
+  // If ucEncoderType = 4 then the Quadrature pins A, B will be used and switches SW1-1, SW1-2, SW1-7, and SW1-8 should be turned on, on on the MSE-Duino board
   
-*/
-	    void Begin(unsigned char ucEncoderType, unsigned char ucEncoderLeftPin1,unsigned char ucEncoderLeftPin2,unsigned char ucEncoderRightPin1,unsigned char ucEncoderRightPin2); 
-/*
-  NOT TESTED -  Begin with set up both encoders: (ucEncoderType 3 - 5 pin data will need to be sent)
-  If ucEncoderType = 5 then the direction, speed, and Quadrature pins A, B pins will be used and switches SW1-1, SW1-2, SW1-3, SW1-4, SW1-7, SW1-8, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
+// */
+	    // void Begin(unsigned char ucEncoderType, unsigned char ucEncoderLeftPin1,unsigned char ucEncoderLeftPin2,unsigned char ucEncoderRightPin1,unsigned char ucEncoderRightPin2); 
+// /*
+  // NOT TESTED -  Begin with set up both encoders: (ucEncoderType 3 - 5 pin data will need to be sent)
+  // If ucEncoderType = 5 then the direction, speed, and Quadrature pins A, B pins will be used and switches SW1-1, SW1-2, SW1-3, SW1-4, SW1-7, SW1-8, SW1-9, and SW1-10 should be turned on, on on the MSE-Duino board
   
-*/
-	    void Begin(unsigned char ucEncoderType, unsigned char ucEncoderLeftA,unsigned char ucEncoderLeftB,unsigned char ucEncoderLeftDir,unsigned char ucEncoderLeftSpd,unsigned char ucEncoderRightA,unsigned char ucEncoderRightB,unsigned char ucEncoderRightDir,unsigned char ucEncoderRightSpd); 	
+// */
+	    // void Begin(unsigned char ucEncoderType, unsigned char ucEncoderLeftA,unsigned char ucEncoderLeftB,unsigned char ucEncoderLeftDir,unsigned char ucEncoderLeftSpd,unsigned char ucEncoderRightA,unsigned char ucEncoderRightB,unsigned char ucEncoderRightDir,unsigned char ucEncoderRightSpd); 	
 		
 		
 		
-		void end();
-		void IRAM_ATTR LeftSpd_Encoder_ISR();  
+		// void end();
+		// void IRAM_ATTR LeftSpd_Encoder_ISR();  
 		
 	
-private:
-        portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+// private:
+        // portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 		
 		
-      //  static void ENC_isrLeftSpd();
+      // //  static void ENC_isrLeftSpd();
 		
-		void (*ISR_callback)();
+		// void (*ISR_callback)();
 				
-		long readEncoders();
+		// long readEncoders();
 		
 		
 		
-	//	static void  ENC_isrLeftSpd();
-	//	static void  ENC_isrRightSpd();
-	//	static void  ENC_isrLeftA();
-	//	static void  ENC_isrLeftB();
-	//	static void  ENC_isrRightA();
-	//	static void  ENC_isrRightB();
+	// //	static void  ENC_isrLeftSpd();
+	// //	static void  ENC_isrRightSpd();
+	// //	static void  ENC_isrLeftA();
+	// //	static void  ENC_isrLeftB();
+	// //	static void  ENC_isrRightA();
+	// //	static void  ENC_isrRightB();
 	
-	    void static ENC_isrLSpd();
+	    // void static ENC_isrLSpd();
 		
-        volatile boolean ENC_btLeftEncoderDirDataFlag;
-		static boolean ENC_btLeftEncoderSpdDataFlag;
-		volatile boolean ENC_btRightEncoderDirDataFlag;
-		volatile boolean ENC_btRightEncoderSpdDataFlag;
+        // volatile boolean ENC_btLeftEncoderDirDataFlag;
+		// static boolean ENC_btLeftEncoderSpdDataFlag;
+		// volatile boolean ENC_btRightEncoderDirDataFlag;
+		// volatile boolean ENC_btRightEncoderSpdDataFlag;
 		 
-		volatile boolean ENC_btLeftEncoderADataFlag;
-		volatile boolean ENC_btLeftEncoderBDataFlag;
-		volatile boolean ENC_btRightEncoderADataFlag;
-		volatile boolean ENC_btRightEncoderBDataFlag;
+		// volatile boolean ENC_btLeftEncoderADataFlag;
+		// volatile boolean ENC_btLeftEncoderBDataFlag;
+		// volatile boolean ENC_btRightEncoderADataFlag;
+		// volatile boolean ENC_btRightEncoderBDataFlag;
  
-        volatile unsigned int ENC_vuiLeftEncoderAMissed;
-		volatile unsigned int ENC_vuiLeftEncoderBMissed;
-		volatile unsigned int ENC_vuiRightEncoderAMissed;
-		volatile unsigned int ENC_vuiRightEncoderBMissed;
+        // volatile unsigned int ENC_vuiLeftEncoderAMissed;
+		// volatile unsigned int ENC_vuiLeftEncoderBMissed;
+		// volatile unsigned int ENC_vuiRightEncoderAMissed;
+		// volatile unsigned int ENC_vuiRightEncoderBMissed;
 		
-		//volatile unsigned int ENC_vuiLeftEncoderDirMissed;
-		volatile unsigned int ENC_vuiLeftEncoderSpdMissed;
-		//volatile unsigned int ENC_vuiRightEncoderDirMissed;
-		volatile unsigned int ENC_vuiRightEncoderSpdMissed;
+		// //volatile unsigned int ENC_vuiLeftEncoderDirMissed;
+		// volatile unsigned int ENC_vuiLeftEncoderSpdMissed;
+		// //volatile unsigned int ENC_vuiRightEncoderDirMissed;
+		// volatile unsigned int ENC_vuiRightEncoderSpdMissed;
 
-        volatile long ENC_vl32LeftEncoderARawTime;
-		volatile long ENC_vl32LeftEncoderBRawTime;
-		volatile long ENC_vl32RightEncoderARawTime;
-		volatile long ENC_vl32RightEncoderBRawTime;
+        // volatile long ENC_vl32LeftEncoderARawTime;
+		// volatile long ENC_vl32LeftEncoderBRawTime;
+		// volatile long ENC_vl32RightEncoderARawTime;
+		// volatile long ENC_vl32RightEncoderBRawTime;
 		
-		volatile long ENC_vlLeftEncoderSpdRawTime;
-		volatile long ENC_vlRightEncoderSpdRawTime;
+		// volatile long ENC_vlLeftEncoderSpdRawTime;
+		// volatile long ENC_vlRightEncoderSpdRawTime;
 		
-		volatile long ENC_vlLeftOdometer;
-        volatile long ENC_vlRightOdometer;
-		
-		
-	//	static Encoders* anchorRightSpd;
-	//	static Encoders* anchorLeftA;
-	//	static Encoders* anchorLeftB;
-	//	static Encoders* anchorRightA;
-	//	static Encoders* anchorRightB;
+		// volatile long ENC_vlLeftOdometer;
+        // volatile long ENC_vlRightOdometer;
 		
 		
-};
+	// //	static Encoders* anchorRightSpd;
+	// //	static Encoders* anchorLeftA;
+	// //	static Encoders* anchorLeftB;
+	// //	static Encoders* anchorRightA;
+	// //	static Encoders* anchorRightB;
+		
+		
+// };
 
 #endif /* MSE2202_LIB_H */

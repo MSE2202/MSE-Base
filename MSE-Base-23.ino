@@ -185,25 +185,7 @@ void setup()
   // set up motor enable switch
   pinMode(MOTOR_ENABLE_SWITCH, INPUT_PULLUP);
 
-  // set up encoders. Must be initialized in order that they are chained together, 
-  // starting with the encoder directly connected to the Arduino. See I2CEncoder docs
-  // for more information
-  pinMode(ENCODER_LEFT_DIR, INPUT_PULLUP);
-  pinMode(ENCODER_LEFT_SPD, INPUT_PULLUP);
-
-  pinMode(ENCODER_RIGHT_DIR, INPUT_PULLUP);
-  pinMode(ENCODER_RIGHT_SPD, INPUT_PULLUP);
-
-  //encoder_LeftMotor.init(1.0/3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-  //encoder_LeftMotor.setReversed(false);  // adjust for positive count when moving forward
-  //encoder_RightMotor.init(1.0/3.0*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);  
-  //encoder_RightMotor.setReversed(true);  // adjust for positive count when moving forward
-
-  // read saved values from EEPROM
- // ui_Left_Motor_Offset = word(b_HighByte, b_LowByte);
- // b_LowByte = EEPROM.read(ci_Right_Motor_Offset_Address_L);
- // b_HighByte = EEPROM.read(ci_Right_Motor_Offset_Address_H);
- // ui_Right_Motor_Offset = word(b_HighByte, b_LowByte);
+   
 
  uiMode_PB_Debounce = 0;
 

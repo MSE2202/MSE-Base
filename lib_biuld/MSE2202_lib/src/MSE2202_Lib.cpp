@@ -557,7 +557,7 @@ void Motion::end()
 //----------------------------------------------------------------------------------------------------------
 //Encoders
 //Encoders* Encoders::anchorLeftSpd = 0;
-  #include "esp_log.h"
+ /*  #include "esp_log.h"
   
  
 void IRAM_ATTR Encoders::LeftSpd_Encoder_ISR()
@@ -682,7 +682,7 @@ void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback)(void))
 
 
 
-
+ */
 
 
 
@@ -750,7 +750,7 @@ static void Encoders::ENC_isrRightB()
 {
 }
  */
-void Encoders::end()
-{
+// void Encoders::end()
+// {
 	
-}
+// }
