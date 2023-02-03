@@ -153,9 +153,15 @@ unsigned long ulCurrentMicros;
 
 
 Motion Bot = Motion();
+//Encoders driveEncoders = Encoders();
+// void IRAM_ATTR LeftSpd_EncoderISR()
+// {
+// 	driveEncoders.LeftSpd_Encoder_ISR();
+// }
 
 //Function Declarations
 void Indicator(void);
+
 
 
 
@@ -166,20 +172,14 @@ void setup()
   Serial.begin(9600);
 
   Bot.driveBegin("D1",LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
-  
+ // driveEncoders.Begin(0,LeftSpd_EncoderISR);
+
   SmartLEDs.begin(); // INITIALIZE SMART LEDs object (REQUIRED)
   SmartLEDs.clear();
   SmartLEDs.setPixelColor(0,SmartLEDs.Color(255,0,0));// Set pixel colors to 'off'
  // SmartLEDs.setBrightness(LEDMaxBrightness);
   SmartLEDs.show();   // Send the updated pixel colors to the hardware.
 
-  
-
-  // // set up arm motors
-  //  ledcSetup(1, 50,14);// channel 1, 50 Hz, 14-bit width
-  //  ledcAttachPin(SHOULDER_SERVO, 1); // assign servo pins to channels
-  //  ledcSetup(2, 50,14);// channel 2, 50 Hz, 14-bit width
-  //  ledcAttachPin(CLAW_SERVO, 2); // assign servo pins to channels
   
 
   // set up motor enable switch
@@ -228,10 +228,10 @@ void loop()
     if(!digitalRead(MODE_BUTTON))
     {
       //button is pressed
-      if(uiMode_PB_Debounce <= 256)   //~25.6 mS debounce
+      if(uiMode_PB_Debounce <= 100)   //~10.0 mS debounce
       {
           uiMode_PB_Debounce = uiMode_PB_Debounce + 1;
-          if(uiMode_PB_Debounce > 255)
+          if(uiMode_PB_Debounce > 100)
           {
               uiMode_PB_Debounce = 1000;
           }
@@ -245,7 +245,7 @@ void loop()
     else
     {
         //button is released
-      if(uiMode_PB_Debounce <= 256)
+      if(uiMode_PB_Debounce <= 101)
       {
           uiMode_PB_Debounce = 0;
          
@@ -273,9 +273,11 @@ void loop()
   // modes 
     // 0 = default after power up/reset
     // 1 = Press mode button once to enter. Run robot.
-    // 2 = Press mode button twice to enter. Calibrate line tracker light level.
-    // 3 = Press mode button three times to enter. Calibrate line tracker dark level.
-    // 4 = Press mode button four times to enter. Calibrate motor speeds to drive straight.
+    // 2 = Press mode button twice to enter. Test encoders
+    // 3 = Press mode button three times to enter. //add your code to do something 
+    // 4 = Press mode button four times to enter.  //add your code to do something 
+    // 5 = Press mode button five times to enter. //add your code to do something 
+    // 6 = Press mode button six times to enter.  //add your code to do something 
     switch(ui_Robot_Mode_Index)
     {
       case 0:    //Robot stopped
@@ -290,20 +292,15 @@ void loop()
       case 1:    //Robot Run after 3 seconds
       {
         
-        if(bt_3_S_Time_Up)
+        if(bt_3_S_Time_Up)  //pauses for 3 sec before running case 1 code
         {
-        
-  
-
-        
-
-
+          
           ucDriveSpeed = map(analogRead(BRDTST_POT_R1),0,4096,150,255);
           Serial.print(F("Drive Speed: Pot R1 = "));
           Serial.print(analogRead(BRDTST_POT_R1));
           Serial.print(F(",mapped = "));
           Serial.println(ucDriveSpeed);
-          Bot.Forward("D1",ucDriveSpeed);
+          Bot.Forward("M1",ucDriveSpeed, ucDriveSpeed-50);
           
          
           if(bt_Motors_Enabled)
