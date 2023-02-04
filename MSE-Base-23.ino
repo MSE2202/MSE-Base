@@ -48,7 +48,9 @@
 
 // Uncomment keywords to enable debugging output
 
-//#define DEBUG_SPEED_POT 1
+
+//#define DEBUG_DRIVE_SPEED 1
+#define DEBUG_ENCODER_COUNT 1
 
 //port pin constants
 
@@ -83,7 +85,7 @@
 #define SMART_LED_COUNT    1       //number of SMART LEDs in use
 //constants
 
-// EEPROM addresses
+
 
 const int ci_Claw_Servo_Open = 1650;         // Experiment to determine appropriate value
 const int ci_Claw_Servo_Closed = 1880;        //  "
@@ -92,26 +94,18 @@ const int ci_Shoulder_Servo_Extended = 1300;      //  "
 
 const int ci_Display_Time = 100;  //100 ms
 
-const int ci_Motor_Calibration_Cycles = 3;
-const int ci_Motor_Calibration_Time = 5000;
 
 //variables
 boolean bt_Motors_Enabled = true;
 
-byte b_LowByte;
-byte b_HighByte;
-
 unsigned char ucDriveSpeed;
 
 unsigned long ul_3_Second_timer = 0;
+unsigned long ul_2_Second_timer = 0;
 unsigned long ul_Display_Time;
-unsigned long ul_Calibration_Time;
 
 
 unsigned int uiMode_Debounce;
-
-unsigned int ui_Cal_Count;
-unsigned int ui_Cal_Cycle;
 
 
 unsigned int  ui_Robot_Mode_Index = 0;
@@ -119,10 +113,9 @@ unsigned int  uiMode_PB_Debounce;
 
 
 boolean bt_3_S_Time_Up = false;
-boolean bt_Do_Once = false;
-boolean bt_Cal_Initialized = false;
+boolean bt_2_S_Time_Up = false;
 
-
+unsigned char  ucDriveIndex;
 
 // Declare our SK6812 SMART LED object:
 Adafruit_NeoPixel SmartLEDs(SMART_LED_COUNT, SMART_LED, NEO_RGB + NEO_KHZ800);
@@ -153,17 +146,18 @@ unsigned long ulCurrentMicros;
 
 
 Motion Bot = Motion();
-//Encoders driveEncoders = Encoders();
-// void IRAM_ATTR LeftSpd_EncoderISR()
-// {
-// 	driveEncoders.LeftSpd_Encoder_ISR();
-// }
+Encoders driveEncoders = Encoders();
+void IRAM_ATTR LeftSpd_EncoderISR()
+{
+	driveEncoders.LeftSpd_Encoder_ISR();
+}
+void IRAM_ATTR RightSpd_EncoderISR()
+{
+	driveEncoders.RightSpd_Encoder_ISR();
+}
 
 //Function Declarations
 void Indicator(void);
-
-
-
 
 
 void setup()
@@ -172,7 +166,7 @@ void setup()
   Serial.begin(9600);
 
   Bot.driveBegin("D1",LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A,RIGHT_MOTOR_B );
- // driveEncoders.Begin(0,LeftSpd_EncoderISR);
+  driveEncoders.Begin(0, LeftSpd_EncoderISR, RightSpd_EncoderISR);
 
   SmartLEDs.begin(); // INITIALIZE SMART LEDs object (REQUIRED)
   SmartLEDs.clear();
@@ -204,6 +198,13 @@ void loop()
     {
       ul_3_Second_timer = 0;
       bt_3_S_Time_Up = true;
+    }
+
+    ul_2_Second_timer = ul_2_Second_timer + 1;
+    if(ul_2_Second_timer > 2000)
+    {
+      ul_2_Second_timer = 0;
+      bt_2_S_Time_Up = true;
     }
   
   //Mode push button debounce and toggle
@@ -242,8 +243,7 @@ void loop()
             ui_Robot_Mode_Index = ui_Robot_Mode_Index & 7;  //keep mode index between 0 and 7
             ul_3_Second_timer = 0;
             bt_3_S_Time_Up = false;
-           // bt_Cal_Initialized = false;
-           // ui_Cal_Cycle = 0;          
+                    
           }
       }
     }
@@ -255,7 +255,7 @@ void loop()
   // modes 
     // 0 = default after power up/reset
     // 1 = Press mode button once to enter. Run robot.
-    // 2 = Press mode button twice to enter. Test encoders
+    // 2 = Press mode button twice to enter. //add your code to do something 
     // 3 = Press mode button three times to enter. //add your code to do something 
     // 4 = Press mode button four times to enter.  //add your code to do something 
     // 5 = Press mode button five times to enter. //add your code to do something 
@@ -265,8 +265,9 @@ void loop()
       case 0:    //Robot stopped
       {
        Bot.Stop("D1");
-      // encoder_LeftMotor.zero();
-      // encoder_RightMotor.zero();
+       ucDriveIndex = 0;
+       driveEncoders.clearEncoder();
+       bt_2_S_Time_Up = false;
       
         break;
       } 
@@ -278,22 +279,76 @@ void loop()
         {
           
           ucDriveSpeed = map(analogRead(BRDTST_POT_R1),0,4096,150,255);
+#ifdef DEBUG_DRIVE_SPEED 
           Serial.print(F("Drive Speed: Pot R1 = "));
           Serial.print(analogRead(BRDTST_POT_R1));
           Serial.print(F(",mapped = "));
           Serial.println(ucDriveSpeed);
-          Bot.Forward("M1",ucDriveSpeed, ucDriveSpeed-50);
+#endif
+#ifdef DEBUG_ENCODER_COUNT
+          driveEncoders.getEncoderRawCount();
+          driveEncoders.getEncoderRawSpeed();
+          Serial.print(F("Left Encoder count = "));
+          Serial.print(driveEncoders.lRawEncoderLeftCount);
+          Serial.print(F("   Right Encoder count = "));
+          Serial.print(driveEncoders.lRawEncoderRightCount);
+          Serial.print(F("   Left Encoder speed = "));
+          Serial.print(driveEncoders.lRawEncoderLeftSpeed);
+          Serial.print(F("   Right Encoder speed = "));
+          Serial.println(driveEncoders.lRawEncoderRightSpeed);
+          
+#endif
+
+        
+         
           
          
           if(bt_Motors_Enabled)
           {
-            //servo_LeftMotor.writeMicroseconds(ui_Left_Motor_Speed);
-          // servo_RightMotor.writeMicroseconds(ui_Right_Motor_Speed);
+            if(bt_2_S_Time_Up)
+            {
+              bt_2_S_Time_Up = false;
+            
+              switch(ucDriveIndex)
+              {
+                case 0: 
+                {
+                  Bot.Stop("D1");
+                  ucDriveIndex = 1;
+                  break;
+                }
+                case 1: 
+                {
+                  Bot.Forward("D1",ucDriveSpeed, ucDriveSpeed);
+                  ucDriveIndex = 2;
+                  break;
+                }
+                case 2: 
+                {
+                  Bot.Reverse("D1",ucDriveSpeed);
+                  ucDriveIndex = 3;
+                  break;
+                }
+                case 3: 
+                {
+                  Bot.Left("D1",ucDriveSpeed);
+                  ucDriveIndex = 4;
+                  break;
+                }
+                case 4: 
+                {
+                  Bot.Right("D1",ucDriveSpeed);
+                  ucDriveIndex = 0;
+                  break;
+                }
+              
+              
+              }
+            }
           }
           else
           {  
-          // servo_LeftMotor.writeMicroseconds(ci_Left_Motor_Stop); 
-            //servo_RightMotor.writeMicroseconds(ci_Right_Motor_Stop); 
+             Bot.Stop("D1");
           }
 
  
@@ -301,79 +356,29 @@ void loop()
         }
         break;
       } 
-    case 2:    //Calibrate motor straightness after 3 seconds.
+    case 2:    //add your code to do something 
       {
-        // if(bt_3_S_Time_Up)
-        // {
-        //   if(!bt_Cal_Initialized)
-        //   {
-        //     bt_Cal_Initialized = true;
-        //   // encoder_LeftMotor.zero();
-        //   // encoder_RightMotor.zero();
-        //     ul_Calibration_Time = millis();
-        //   // servo_LeftMotor.writeMicroseconds(ui_Motors_Speed);
-        //     //servo_RightMotor.writeMicroseconds(ui_Motors_Speed);
-        //   }
-        //   else if((millis() - ul_Calibration_Time) > ci_Motor_Calibration_Time) 
-        //   {
-        //   //  servo_LeftMotor.writeMicroseconds(ci_Left_Motor_Stop); 
-        //   //  servo_RightMotor.writeMicroseconds(ci_Right_Motor_Stop); 
-        //   // l_Left_Motor_Position = encoder_LeftMotor.getRawPosition();
-        //   // l_Right_Motor_Position = encoder_RightMotor.getRawPosition();
-        //     if(l_Left_Motor_Position > l_Right_Motor_Position)
-        //     {
-        //     // May have to update this if different calibration time is used
-        //       ui_Right_Motor_Offset = 0;
-        //       ui_Left_Motor_Offset = (l_Left_Motor_Position - l_Right_Motor_Position) / 4;  
-        //     }
-        //     else
-        //     {
-        //     // May have to update this if different calibration time is used
-        //       ui_Right_Motor_Offset = (l_Right_Motor_Position - l_Left_Motor_Position) / 4;
-        //       ui_Left_Motor_Offset = 0;
-        //     }
-            Bot.Reverse("D1",ucDriveSpeed);
-  // #ifdef DEBUG_MOTOR_CALIBRATION
-  //           Serial.print("Motor Offsets: Left = ");
-  //           Serial.print(ui_Left_Motor_Offset);
-  //           Serial.print(", Right = ");
-  //           Serial.println(ui_Right_Motor_Offset);
-  // #endif              
-  //       //   EEPROM.write(ci_Right_Motor_Offset_Address_L, lowByte(ui_Right_Motor_Offset));
-  //       //   EEPROM.write(ci_Right_Motor_Offset_Address_H, highByte(ui_Right_Motor_Offset));
-  //       //   EEPROM.write(ci_Left_Motor_Offset_Address_L, lowByte(ui_Left_Motor_Offset));
-  //         //  EEPROM.write(ci_Left_Motor_Offset_Address_H, highByte(ui_Left_Motor_Offset));
-            
-  //           ui_Robot_Mode_Index = 0;    // go back to Mode 0 
-  //         }
-  // #ifdef DEBUG_MOTOR_CALIBRATION           
-  //           Serial.print("Encoders L: ");
-  //         // Serial.print(encoder_LeftMotor.getRawPosition());
-  //           Serial.print(", R: ");
-  //         // Serial.println(encoder_RightMotor.getRawPosition());
-  // #endif        
-          
-   //     } 
+        ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }   
-      case 3:
+      case 3://add your code to do something 
       {
-        Bot.Left("D1",ucDriveSpeed);
-        //ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
+        
+        ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  
-      case 4:
+      case 4://add your code to do something 
       {
-        Bot.Right("D1",ucDriveSpeed);
-        //ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
+        
+        ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  
-      case 5:
+      case 5://add your code to do something 
       {
         ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
       }  
-      case 6:
+      case 6://add your code to do something 
       {
         ui_Robot_Mode_Index = 0; //  !!!!!!!   remove if using the case
         break;
@@ -408,30 +413,6 @@ void Indicator()
   SmartLEDs.show();   // Send the updated pixel colors to the hardware.
 }
 
-
-
-// // measure distance to target using ultrasonic sensor  
-// void Ping()
-// {
-//   //Ping Ultrasonic
-//   //Send the Ultrasonic Range Finder a 10 microsecond pulse per tech spec
-//   digitalWrite(ci_Ultrasonic_Ping, HIGH);
-//   delayMicroseconds(10);  //The 10 microsecond pause where the pulse in "high"
-//   digitalWrite(ci_Ultrasonic_Ping, LOW);
-//   //use command pulseIn to listen to Ultrasonic_Data pin to record the
-//   //time that it takes from when the Pin goes HIGH until it goes LOW 
-//   ul_Echo_Time = pulseIn(ci_Ultrasonic_Data, HIGH, 10000);
-
-//   // Print Sensor Readings
-// #ifdef DEBUG_ULTRASONIC
-//   Serial.print("Time (microseconds): ");
-//   Serial.print(ul_Echo_Time, DEC);
-//   Serial.print(", Inches: ");
-//   Serial.print(ul_Echo_Time/148); //divide time by 148 to get distance in inches
-//   Serial.print(", cm: ");
-//   Serial.println(ul_Echo_Time/58); //divide time by 58 to get distance in cm 
-// #endif
-// }  
 
 
 

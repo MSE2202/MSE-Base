@@ -557,7 +557,7 @@ void Motion::end()
 //----------------------------------------------------------------------------------------------------------
 //Encoders
 //Encoders* Encoders::anchorLeftSpd = 0;
- /*  #include "esp_log.h"
+  #include "esp_log.h"
   
  
 void IRAM_ATTR Encoders::LeftSpd_Encoder_ISR()
@@ -568,48 +568,87 @@ void IRAM_ATTR Encoders::LeftSpd_Encoder_ISR()
 	
    volatile static int32_t ENC_vsi32LastTime;
    volatile static int32_t ENC_vsi32ThisTime;
-  
+   volatile static int32_t ENC_vsi32LastOdometer;
  
-   // if the last interrupts data wasn't collected, count the miss
-  if(this->ENC_btLeftEncoderSpdDataFlag)
-  {
-    this->ENC_vuiLeftEncoderSpdMissed += 1;
-    
-  }
- 
-  //how much time elapsed since last interrupt
-  
-  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime )); // @ 240mHz clock each tick is ~4nS 
-  this->ENC_vl32LeftEncoderARawTime = ENC_vsi32ThisTime - ENC_vsi32LastTime;
-  ENC_vsi32LastTime = ENC_vsi32ThisTime;
-  this->ENC_btLeftEncoderSpdDataFlag = true;
 
   //if Read Left direction pin if low count up otherwise wheel is going backwards count down
   //odometer reading
   if(digitalRead(17))  // MSE-Dunio port pin
   {
-    this->ENC_vlLeftOdometer += 1;
+    this->ENC_vlLeftOdometer -= 1;
   }
   else
   {
-    this->ENC_vlLeftOdometer -= 1;
+    this->ENC_vlLeftOdometer += 1;
+  }
+  
+  
+  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime )); // @ 240mHz clock each tick is ~4nS 
+ 
+  
+  if(ENC_vsi32ThisTime - ENC_vsi32LastTime >= 25000000 ) //~ every 100 mSec
+  {
+	  ENC_vsi32LastTime = ENC_vsi32ThisTime;
+	  this->ENC_vlLeftEncoderRawSpeed = this->ENC_vlLeftOdometer - ENC_vsi32LastOdometer;
+	  ENC_vsi32LastOdometer = this->ENC_vlLeftOdometer;
   }
 
+	portEXIT_CRITICAL_ISR(&(this->mux));
+
+}
+
+void IRAM_ATTR Encoders::RightSpd_Encoder_ISR()
+{
+
+	portENTER_CRITICAL_ISR(&(this->mux));
+
+	
+   volatile static int32_t ENC_vsi32LastTime;
+   volatile static int32_t ENC_vsi32ThisTime;
+   volatile static int32_t ENC_vsi32LastOdometer;
+  
+ 
+
+  //if Read Left direction pin if low count up otherwise wheel is going backwards count down
+  //odometer reading
+  if(digitalRead(13))  // MSE-Dunio port pin
+  {
+    this->ENC_vlRightOdometer -= 1;
+  }
+  else
+  {
+    this->ENC_vlRightOdometer += 1;
+  }
+  
+  
+  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime )); // @ 240mHz clock each tick is ~4nS 
+    
+  if(ENC_vsi32ThisTime - ENC_vsi32LastTime >= 25000000 ) //~ every 100 mSec
+  {
+	  ENC_vsi32LastTime = ENC_vsi32ThisTime;
+	  this->ENC_vlRightEncoderRawSpeed = this->ENC_vlRightOdometer - ENC_vsi32LastOdometer;
+	  ENC_vsi32LastOdometer = this->ENC_vlRightOdometer;
+  }
 
 	portEXIT_CRITICAL_ISR(&(this->mux));
 
 }
 
 
-
-
 Encoders::Encoders()
 {
-	
+	this->ENC_vlLeftOdometer = 0;
+	this->ENC_vlRightOdometer = 0;
+	lRawEncoderLeftCount = 0;
+	lRawEncoderRightCount = 0;
+	lRawEncoderLeftSpeed = 0;
+	this->ENC_vlLeftEncoderRawSpeed = 0;
+	lRawEncoderRightSpeed = 0;
+	this->ENC_vlRightEncoderRawSpeed = 0;
 }
 
 
-void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback)(void))
+void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback_Left)(void), void (*ISR_callback_Right)(void))
 {
 	switch(ucEncoderType)
 	{
@@ -622,11 +661,11 @@ void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback)(void))
 			pinMode(14, INPUT_PULLUP);  //#define ENCODER_RIGHT_SPD 14  //when DIP Switch S1-10 is ON, Right encoder Speed signal is connected to pin 22 GPIO14 (J14); 
 
 			
-			// enable GPIO interrupt on change
-			//attachInterrupt(17, ENC_isrLeftDir, CHANGE);
-			attachInterrupt(18, ISR_callback, CHANGE);
-			//attachInterrupt(13, ENC_isrRightDir, CHANGE);
-	//		attachInterrupt(14, ENC_isrRightSPD, CHANGE);
+			
+			attachInterrupt(digitalPinToInterrupt(18), ISR_callback_Left, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(14), ISR_callback_Right, CHANGE);
+			
+		
 			break;
 		}
 		case 1:
@@ -638,10 +677,7 @@ void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback)(void))
 			pinMode(12, INPUT_PULLUP);     //#define ENCODER_RIGHT_B 12    //when DIP Switch S1-8 is ON, Right encoder B signal is connected to pin 20 GPIO12 (J12); 
 			
 			// enable GPIO interrupt on change
-	//		attachInterrupt(15, ENC_isrLeftA, CHANGE);
-	//		attachInterrupt(16, ENC_isrLeftB, CHANGE);
-	//		attachInterrupt(11, ENC_isrRightA, CHANGE);
-	//		attachInterrupt(12, ENC_isrRightB, CHANGE);
+	
 			break;
 		}
 		case 2:
@@ -658,16 +694,7 @@ void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback)(void))
 			pinMode(14, INPUT_PULLUP);  //#define ENCODER_RIGHT_SPD 14  //when DIP Switch S1-10 is ON, Right encoder Speed signal is connected to pin 22 GPIO14 (J14); 
 			
 			// enable GPIO interrupt on change
-	//		attachInterrupt(15, ENC_isrLeftA, CHANGE);
-	//		attachInterrupt(16, ENC_isrLeftB, CHANGE);
-	//		attachInterrupt(11, ENC_isrRightA, CHANGE);
-	//		attachInterrupt(12, ENC_isrRightB, CHANGE);
-			
-			// enable GPIO interrupt on change
-			//attachInterrupt(17, ENC_isrLeftDir, CHANGE);
-	//		attachInterrupt(18, ENC_isrLeftSpd, CHANGE);
-			//attachInterrupt(13, ENC_isrRightDir, CHANGE);
-	//		attachInterrupt(14, ENC_isrRightSPD, CHANGE);
+	
 			break;
 		}
 		
@@ -679,78 +706,30 @@ void Encoders::Begin(unsigned char ucEncoderType, void (*ISR_callback)(void))
 }
 
 
-
-
-
- */
-
-
-
-//Encoder interrupt service routines - entered every change in in encoder pin H-> L and L ->H
-
-/* void Encoders::ENC_isrLSpd()
+void Encoders::getEncoderRawCount()
 {
-   volatile static int32_t ENC_vsi32LastTime;
-   volatile static int32_t ENC_vsi32ThisTime;
-  
- 
-   // if the last interrupts data wasn't collected, count the miss
-  if(anchorLeftSpd->ENC_btLeftEncoderSpdDataFlag)
-  {
-    anchorLeftSpd->ENC_vuiLeftEncoderSpdMissed += 1;
-    
-  }
- 
-  //how much time elapsed since last interrupt
-  
-  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime )); // @ 240mHz clock each tick is ~4nS 
-  anchorLeftSpd->ENC_vl32LeftEncoderARawTime = ENC_vsi32ThisTime - ENC_vsi32LastTime;
-  ENC_vsi32LastTime = ENC_vsi32ThisTime;
-  anchorLeftSpd->ENC_btLeftEncoderSpdDataFlag = true;
-
-  //if Read Left direction pin if low count up otherwise wheel is going backwards count down
-  //odometer reading
-  if(digitalRead(17))
-  {
-    anchorLeftSpd->ENC_vlLeftOdometer += 1;
-  }
-  else
-  {
-    anchorLeftSpd->ENC_vlLeftOdometer -= 1;
-  }
-
-  
+	lRawEncoderLeftCount = this->ENC_vlLeftOdometer;
+	lRawEncoderRightCount = this->ENC_vlRightOdometer;
 }
-static void Encoders::ENC_isrLeftSpd()
-{
-	anchorLeftSpd->ENC_isrLSpd();
-} */
-
-/* static void Encoders::ENC_isrLeftSpd()
-{
-}
-
-static void Encoders::ENC_isrRightSPD()
-{
-}
-
-static void Encoders::ENC_isrLeftA()
-{
-}
-
-static void Encoders::ENC_isrLeftB()
-{
-}
-
-static void Encoders::ENC_isrRightA()
-{
-}
-
-static void Encoders::ENC_isrRightB()
-{
-}
- */
-// void Encoders::end()
-// {
 	
-// }
+void Encoders::getEncoderRawSpeed()
+{
+	lRawEncoderLeftSpeed = this->ENC_vlLeftEncoderRawSpeed;
+	lRawEncoderRightSpeed = this->ENC_vlRightEncoderRawSpeed;
+}
+	
+void Encoders::clearEncoder()
+{
+	this->ENC_vlLeftOdometer = 0;
+	this->ENC_vlRightOdometer = 0;
+	lRawEncoderLeftCount = 0;
+	lRawEncoderRightCount = 0;
+}
+
+
+
+
+ void Encoders::end()
+ {
+	
+ }
