@@ -77,7 +77,7 @@
 #define ENCODER_RIGHT_SPD   14  // When DIP Switch S1-10 is on, Right encoder Speed signal is connected to pin 22 GPIO14 (J14)
                                 // When DIP Switch S1-10 is off, J14 can be used as analog AD2-3
                                    
-#define BRDTST_POT_R1       1   // When DIP Switch S1-12 is on, Analog AD0 (pin 39) GPIO1 is connected to Poteniometer R1
+#define BRDTST_POT_R1       1   // When DIP Switch S1-12 is on, Analog AD1-0 (pin 39) GPIO1 is connected to Poteniometer R1
 
 #define STEPPER_DIR         39  // GPIO39 pin 32 (J39) STEPPER Motor direction pin
 #define STEPPER_CLK         40  // GPIO40 pin 33 (J40) stepper motor clock pin
@@ -85,7 +85,7 @@
 #define SMART_LED           21  // When DIP Switch S1-11 is on, Smart LED is connected to pin 23 GPIO21 (J21)
 #define SMART_LED_COUNT     1   // Number of SMART LEDs in use
 
-#define IR_DETECTOR          9   //IR deetector input
+#define IR_DETECTOR         9   // GPIO9 pin 17 (J9) IR detector input
 
 #define LEFT                1   // Indicates left direction for (stepper) motor
 #define RIGHT               0   // Indicates right direction for (stepper) motor
@@ -166,16 +166,14 @@ unsigned int  ui_Mode_Indicator[7] = {                                        //
   SmartLEDs.Color(0,0,255),                                                   //   Blue - Test stepper
   SmartLEDs.Color(255,255,0),                                                 //   Yellow - Test claw servo
   SmartLEDs.Color(255,0,255),                                                 //   Magenta - Test shoulder servo
-  SmartLEDs.Color(0,255,255),                                                 //   Cyan - empty case
+  SmartLEDs.Color(0,255,255),                                                 //   Cyan - Test IR receiver
   SmartLEDs.Color(255,165,0)                                                  //   Orange - empty case
 };                                                                            
 
 // Motor and encoder objects (classes defined in MSE2202_Lib)
 Motion Bot = Motion();                                                        // Instance of Motion for motor control
 Encoders driveEncoders = Encoders();                                          // Instance of Encoders for encoder data
-
 IR Scan = IR();                                                               // Instance of IR for beacon detection
-
 
 // Interrupt Service Routines
 void IRAM_ATTR LeftSpd_EncoderISR()                                           // ISR to update left encoder count
@@ -297,10 +295,10 @@ void loop()
       // modes 
       // 0 = Default after power up/reset. Robot is stopped.
       // 1 = Press mode button once to enter. Run robot.
-      // 2 = Press mode button twice to enter. //add your code to do something 
-      // 3 = Press mode button three times to enter. //add your code to do something 
-      // 4 = Press mode button four times to enter.  //add your code to do something 
-      // 5 = Press mode button five times to enter. //add your code to do something 
+      // 2 = Press mode button twice to enter. Test stepper motor. 
+      // 3 = Press mode button three times to enter. Test claw servo. 
+      // 4 = Press mode button four times to enter. Test arm shoulder servo.
+      // 5 = Press mode button five times to enter. Test IR receiver. 
       // 6 = Press mode button six times to enter.  //add your code to do something 
       switch(ui_Robot_Mode_Index)
       {
@@ -547,11 +545,11 @@ void loop()
             break;
          }
            
-         case 5: //Test IR Detection 
+         case 5: // Test IR receiver
          {
-            if(Scan.Available())
+            if(Scan.Available())                                              // If data is received
             {
-              Serial.println(Scan.Get_IR_Data());
+              Serial.println(Scan.Get_IR_Data());                             // Output received data to serial
             }
             break;
          }
