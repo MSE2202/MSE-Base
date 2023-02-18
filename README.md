@@ -2,7 +2,7 @@
 
 This is the base code that is for used for the MSEbot that is constructed, tested, and programmed in MSE 2202 Labs 3 and 4. 
 
-Note that this code is regularly updated to add and improve functionality. It is highly recommended that you clone the repository and regularly ensure that it is up to date via `git pull`. Your own code should be developed in a separate branch to simply updates and merging.
+Note that this code is regularly updated to add and improve functionality. It is highly recommended that you clone the repository and regularly ensure that it is up to date via `git pull`. Your own code should be developed in a separate branch to simplify updates and merging.
 
 The code depends on the [MSE2202_Lib](https://github.com/MSE2202/MSE2202_Lib) library. It is also recommended that it is cloned and installed via the Arduino IDE.
 
