@@ -85,8 +85,12 @@
 #define SMART_LED           21  // When DIP Switch S1-11 is on, Smart LED is connected to pin 23 GPIO21 (J21)
 #define SMART_LED_COUNT     1   // Number of SMART LEDs in use
 
+#define IR_DETECTOR          9   //IR deetector input
+
 #define LEFT                1   // Indicates left direction for (stepper) motor
 #define RIGHT               0   // Indicates right direction for (stepper) motor
+
+
 
 // Constants
 
@@ -170,6 +174,9 @@ unsigned int  ui_Mode_Indicator[7] = {                                        //
 Motion Bot = Motion();                                                        // Instance of Motion for motor control
 Encoders driveEncoders = Encoders();                                          // Instance of Encoders for encoder data
 
+IR Scan = IR();                                                               // Instance of IR for beacon detection
+
+
 // Interrupt Service Routines
 void IRAM_ATTR LeftSpd_EncoderISR()                                           // ISR to update left encoder count
 {
@@ -187,6 +194,9 @@ void Indicator();                                                             //
 void setup()
 {
    Serial.begin(9600);
+
+   Scan.Begin(IR_DETECTOR);                                                    //set up IR Detection
+
 
    // Set up motors and encoders
    Bot.driveBegin("D1", LEFT_MOTOR_A, LEFT_MOTOR_B, RIGHT_MOTOR_A, RIGHT_MOTOR_B); // Set up motors as Drive 1
@@ -208,10 +218,13 @@ void setup()
    //Stepper motor 
    pinMode(STEPPER_CLK, OUTPUT);                                              // Set up stepper step/clock pin as output
    pinMode(STEPPER_DIR, OUTPUT);                                              // Set up stepper direction pin as output
+
+   pinMode(MODE_BUTTON, INPUT_PULLUP);                                        //set up mode button with internal pullup
 }
 
 void loop()
 {
+    
    ul_Current_Micros = micros();                                              // Get current time in microseconds
    if ((ul_Current_Micros - ul_Previous_Micros) >= 1000)                      // Enter when 1 ms has elapsed
    {
@@ -534,9 +547,12 @@ void loop()
             break;
          }
            
-         case 5: //add your code to do something 
+         case 5: //Test IR Detection 
          {
-            ui_Robot_Mode_Index = 0; //  !!!!!!!  remove if using the case
+            if(Scan.Available())
+            {
+              Serial.println(Scan.Get_IR_Data());
+            }
             break;
          }
            
